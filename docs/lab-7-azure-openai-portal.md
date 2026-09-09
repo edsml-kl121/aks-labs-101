@@ -250,6 +250,39 @@ federated credential in the Azure portal:
 
    ![Managed identity federated credentials](aks-automatic/assets/managed-identity-federated-credentials.png)
 
+### Set the GitHub Actions secrets before rerunning
+
+The generated workflow reads the Azure identity values from GitHub Actions
+repository secrets. Add all three secrets before rerunning the failed pipeline:
+
+1. In the Azure portal, open the user-assigned managed identity used for the
+   federated credential and select **Overview**.
+2. Record its **Client ID** and **Subscription ID**. Use the client ID, not the
+   similarly named Object (principal) ID.
+
+![Managed identity client and subscription IDs](aks-automatic/assets/managed-identity-azure-ids.png)
+
+3. To find the tenant ID, search the Azure portal for **Microsoft Entra ID**,
+   open **Overview**, and record the **Tenant ID**.
+4. In GitHub, open your `contoso-air` fork and select **Settings** > **Secrets
+   and variables** > **Actions**.
+5. Under **Repository secrets**, select **New repository secret** and create
+   each of these secrets:
+
+   | Secret name | Secret value |
+   | --- | --- |
+   | `AZURE_CLIENT_ID` | The user-assigned managed identity **Client ID** |
+   | `AZURE_SUBSCRIPTION_ID` | The Azure **Subscription ID** |
+   | `AZURE_TENANT_ID` | The Microsoft Entra **Tenant ID** |
+
+   Enter the names exactly as shown; GitHub secret names are referenced by the
+   generated workflow. Do not use the managed identity's Object (principal) ID
+   for `AZURE_CLIENT_ID`.
+6. Confirm that all three secret names appear under **Repository secrets**.
+   GitHub hides their values after they are saved.
+
+![Required GitHub Actions Azure secrets](aks-automatic/assets/github-actions-azure-secrets.png)
+
 10. Return to the failed GitHub Actions run and select **Re-run jobs** >
     **Re-run failed jobs**.
 
