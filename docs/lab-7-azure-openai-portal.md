@@ -225,7 +225,7 @@ federated credential in the Azure portal:
    | Repository ID | The `repo_id` returned by `gh api` |
    | Entity type | **Branch** |
    | GitHub branch name | `main` |
-   | Name | `contoso-air-<your-name>-main` |
+   | Name | `github-contoso-air-<your-name>-main` |
 
 ![GitHub federated credential details](aks-automatic/assets/github-federated-credential-details.png)
 
