@@ -1,9 +1,9 @@
 # Lab 7: Connect AKS to Azure OpenAI in the Azure portal
 
 This is the portal-only AKS Automatic and Azure OpenAI path. It forks the
-Contoso Air application, creates an AKS Automatic cluster with Azure Automated
-Deployments, and connects the application to Azure OpenAI. You do not need Bash,
-Azure CLI, GitHub CLI, or `kubectl`.
+Contoso Air application, deploys it to the existing lab AKS cluster with Azure
+Automated Deployments, and connects the application to Azure OpenAI. You do not
+need Bash, Azure CLI, GitHub CLI, or `kubectl`.
 
 The screenshots below come from the
 [AKS Automatic lab](https://azure-samples.github.io/aks-labs/docs/getting-started/aks-automatic/).
@@ -14,15 +14,20 @@ This option follows the source lab's `dev` namespace and Contoso Air application
 You should already have:
 
 - The Azure resource group and shared resources from the earlier lab steps.
+- The existing AKS cluster provisioned in the earlier lab steps.
 - A user-assigned managed identity whose name normally begins with `myidentity`.
 - A GitHub account that can create a fork and authorize Azure access.
-- Permission to create Azure OpenAI resources and Azure role assignments.
+- **Contributor** and **User Access Administrator** roles on the lab resource
+   group.
+- The **DevHub GitHub OAuth** custom role at subscription scope. Download the
+   [custom role definition](aks-automatic/assets/devhub-github-oauth-role.json),
+   replace `<subscription-id>` with your subscription ID, create the role, and
+   assign it at subscription scope. If the custom role cannot be created, use
+   **Contributor** at subscription scope instead.
 
 > Azure OpenAI model availability and quota vary by subscription and region.
-> This path creates a new AKS Automatic cluster as well as an Azure OpenAI
-> account and model deployment. These resources may incur charges. If you
-> already created the standard AKS cluster in the earlier steps, both clusters
-> will exist until you delete one.
+> This path creates an Azure OpenAI account and model deployment. These
+> resources may incur charges, but the path reuses the existing lab AKS cluster.
 
 ## 1. Create an Azure OpenAI resource
 
@@ -121,14 +126,13 @@ Under **Deployment configuration**, enter:
 
 Select **Next**.
 
-## 6. Create the AKS Automatic cluster
+## 6. Select the existing AKS cluster
 
-1. Under **Cluster configuration**, select **Create Automatic Kubernetes
-   cluster**. This is the required AKS Automatic choice.
-2. Set **Kubernetes cluster name** to `myakscluster-auto` or another unique
-   name.
+1. Under **Cluster configuration**, select **Existing AKS Cluster**. Do not
+   create another AKS cluster.
+2. Select the lab subscription, resource group, and existing AKS cluster.
 
-![Select Create Automatic Kubernetes cluster](aks-automatic/assets/deploy-app-cluster-new.png)
+![Select the existing AKS cluster](aks-automatic/assets/Deploy%20an%20application.png)
 
 3. For **Namespace**, select **Create new** and enter `dev`.
 
@@ -141,10 +145,10 @@ Select **Next**.
 
 ![Review the Automated Deployment](aks-automatic/assets/deploy-app-review.png)
 
-7. Select **Deploy**. Keep the browser page open while Azure creates the AKS
-   Automatic cluster and prepares the GitHub workflow. This can take 20 minutes.
+7. Select **Deploy**. Keep the browser page open while Azure prepares the GitHub
+   workflow and application deployment. This can take up to 20 minutes.
 
-![Deploy the application and AKS Automatic cluster](aks-automatic/assets/deploy-app-deploy.png)
+![Deploy the application](aks-automatic/assets/deploy-app-deploy.png)
 
 ## 7. Review and merge the generated pull request
 
@@ -283,18 +287,44 @@ repository secrets. Add all three secrets before rerunning the failed pipeline:
 
 ![Required GitHub Actions Azure secrets](aks-automatic/assets/github-actions-azure-secrets.png)
 
-10. Return to the failed GitHub Actions run and select **Re-run jobs** >
-    **Re-run failed jobs**.
+### Reduce resources before rerunning a failed deployment
 
-8. Wait until both `buildImage` and `deploy` show green check marks. This usually
-   takes 5-10 minutes. If deployment then waits or fails while AKS is adding
-   capacity, use **Re-run failed jobs** once the cluster is ready.
+The AKS cluster is shared with other students. Before rerunning a failed deploy
+job, reduce the generated workload's resource requirements:
+
+1. In your GitHub fork, open `manifests/deployment.yaml` and select **Edit**.
+2. Set `spec.replicas` to `1`, or remove `replicas` to use the Kubernetes
+    default.
+3. Replace the generated container resource settings with the values below.
+    Keep the generated container name unchanged.
+
+    ```yaml
+    spec:
+       replicas: 1
+       template:
+          spec:
+             containers:
+                - name: <generated-container-name>
+                   resources:
+                      requests:
+                         cpu: "10m"
+                         memory: "256Mi"
+                      limits:
+                         cpu: "1"
+                         memory: "512Mi"
+    ```
+
+4. Commit the change to the `main` branch.
+5. If the commit does not start a new workflow automatically, return to the
+    failed GitHub Actions run and select **Re-run jobs** > **Re-run failed jobs**.
+6. Wait until both `buildImage` and `deploy` show green check marks. This usually
+    takes 5-10 minutes.
 
 ![Successful GitHub Actions workflow](aks-automatic/assets/github-action-done.png)
 
 ## 8. Test Contoso Air before connecting it
 
-1. In the Azure portal, open `myakscluster-auto`.
+1. In the Azure portal, open the existing lab AKS cluster.
 2. Select **Kubernetes resources** > **Services and ingresses**.
 3. Select the external IP for the `contoso-air` service.
 
@@ -328,7 +358,7 @@ Use your actual model deployment name if you did not deploy `gpt-5.4-mini`.
 ## 10. Open Service Connector
 
 1. Return to the [Azure portal](https://portal.azure.com/).
-2. Open the AKS Automatic cluster created in step 6.
+2. Open the existing lab AKS cluster selected in step 6.
 3. In the cluster menu, select **Settings** > **Service Connector**.
 4. Select **+ Create**.
 

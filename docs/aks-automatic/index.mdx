@@ -48,6 +48,13 @@ flowchart LR
   ]}
 />
 
+### Required Azure roles
+
+Before starting the lab, make sure your account has these role assignments:
+
+- **Contributor** and **User Access Administrator** on the lab resource group.
+- **DevHub GitHub OAuth** on the subscription. This custom role grants the minimum permissions needed for the AKS Automated Deployments GitHub handshake. Use the [custom role definition](./assets/devhub-github-oauth-role.json), replace `<subscription-id>` with your subscription ID, create the role, and assign it at subscription scope. If your organization cannot create this custom role, **Contributor** at subscription scope also provides the required permissions.
+
 This workshop will need some Azure preview features enabled and resources to be pre-provisioned. You can use the Azure CLI commands below to register the preview features.
 
 Register preview features.
@@ -208,9 +215,9 @@ In the **Deployment configuration** section, fill in the following details:
 
 Select **Next**.
 
-In the **Cluster configuration** section, ensure the **Create Automatic Kubernetes cluster** option is chosen and specify `myakscluster` as the **Kubernetes cluster name**.
+In the **Cluster configuration** section, select **Existing AKS Cluster**, then select the subscription, resource group, and AKS cluster provisioned for this lab. Do not create another AKS cluster.
 
-![AKS Automatic cluster creation](./assets/deploy-app-cluster-new.png)
+![Select an existing AKS cluster](./assets/Deploy%20an%20application.png)
 
 For **Namespace**, select **Create new** and type `dev`.
 
@@ -303,7 +310,26 @@ After 5-10 minutes, the workflow will complete and you will see two green check 
 ![GitHub Actions workflow success](./assets/github-action-done.png)
 
 :::tip
-If the deploy job fails, it is likely that Node Autoprovisioning (NAP) is taking a bit longer than usual to provision a new node for the cluster. Try selecting the "Re-run" button at the top of the page to re-run the deploy workflow job.
+
+If the deploy job fails because the shared cluster does not have enough available resources, edit `manifests/deployment.yaml` in your fork before redeploying. Set `spec.replicas` to `1` (or remove it to use the default), and replace the generated container resource settings with the smaller values below. Keep the generated container name unchanged.
+
+```yaml
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: <generated-container-name>
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+```
+
+Commit the manifest change, then rerun the failed workflow from the **Actions** tab if a new run does not start automatically.
 
 :::
 

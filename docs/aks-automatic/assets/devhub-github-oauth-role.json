@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "roleName": "DevHub GitHub OAuth",
+    "description": "Minimal permissions for AKS Automated Deployments GitHub handshake",
+    "assignableScopes": [
+      "/subscriptions/<subscription-id>"
+    ],
+    "permissions": [
+      {
+        "actions": [
+          "Microsoft.DevHub/*",
+          "Microsoft.Network/publicIPAddresses/read",
+          "Microsoft.Network/loadBalancers/read"
+        ],
+        "notActions": [],
+        "dataActions": [],
+        "notDataActions": []
+      }
+    ]
+  }
+}
