@@ -364,17 +364,25 @@ job, reduce the generated workload's resource requirements:
                 - name: <generated-container-name>
                    resources:
                       requests:
-                         cpu: "10m"
+                         cpu: "100m"
                          memory: "256Mi"
                       limits:
                          cpu: "1"
                          memory: "512Mi"
     ```
 
-4. Commit the change to the `main` branch.
-5. If the commit does not start a new workflow automatically, return to the
+4. Open `manifests/hpa.yaml`, select **Edit**, and set the maximum replica
+   count:
+
+    ```yaml
+    spec:
+       maxReplicas: 3
+    ```
+
+5. Commit both changes to the `main` branch.
+6. If the commit does not start a new workflow automatically, return to the
     failed GitHub Actions run and select **Re-run jobs** > **Re-run failed jobs**.
-6. Wait until both `buildImage` and `deploy` show green check marks. This usually
+7. Wait until both `buildImage` and `deploy` show green check marks. This usually
     takes 5-10 minutes.
 
 ![Successful GitHub Actions workflow](aks-automatic/assets/github-action-done.png)

@@ -322,14 +322,21 @@ spec:
         - name: <generated-container-name>
           resources:
             requests:
-              cpu: "10m"
+              cpu: "100m"
               memory: "256Mi"
             limits:
               cpu: "1"
               memory: "512Mi"
 ```
 
-Commit the manifest change, then rerun the failed workflow from the **Actions** tab if a new run does not start automatically.
+In `manifests/hpa.yaml`, reduce the maximum replica count:
+
+```yaml
+spec:
+  maxReplicas: 3
+```
+
+Commit both manifest changes, then rerun the failed workflow from the **Actions** tab if a new run does not start automatically.
 
 :::
 
