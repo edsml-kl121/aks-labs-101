@@ -190,13 +190,49 @@ federated credential in the Azure portal:
 
    `repo:<owner>@<owner-id>/<repository>@<repository-id>:ref:refs/heads/<branch>`
 
-   To discover those values, run this optional GitHub CLI example, replacing
-   the owner and repository when needed:
+   To discover those values, you can optionally use GitHub CLI. Azure CLI,
+   `kubectl`, and Git are not required for this query.
 
-   ```bash
-   gh api repos/<your-username>/contoso-air \
-     --jq '{owner: .owner.login, owner_id: .owner.id, repo: .name, repo_id: .id, branch: .default_branch}'
-   ```
+   **Optional GitHub CLI setup**
+
+   1. Open a Bash terminal. In GitHub Codespaces, GitHub CLI is already
+      installed. Otherwise, install [GitHub CLI](https://cli.github.com/) for
+      your operating system. On Ubuntu, run:
+
+      ```bash
+      sudo apt update
+      sudo apt install gh
+      ```
+
+   2. Confirm that GitHub CLI is available:
+
+      ```bash
+      gh --version
+      ```
+
+   3. Sign in to the GitHub account that owns the `contoso-air` fork:
+
+      ```bash
+      gh auth login --web --git-protocol https
+      ```
+
+      Select `GitHub.com` if prompted, then follow the browser or device-code
+      instructions. Do not enter a GitHub password or token directly into this
+      command.
+
+   4. Verify the authenticated account:
+
+      ```bash
+      gh auth status
+      ```
+
+   5. Query your fork, replacing `<your-username>` with the account shown by
+      `gh auth status`:
+
+      ```bash
+      gh api repos/<your-username>/contoso-air \
+        --jq '{owner: .owner.login, owner_id: .owner.id, repo: .name, repo_id: .id, branch: .default_branch}'
+      ```
 
    Map the output to the subject as follows:
 
