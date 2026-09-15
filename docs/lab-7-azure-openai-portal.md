@@ -290,6 +290,27 @@ federated credential in the Azure portal:
 
    ![Managed identity federated credentials](aks-automatic/assets/managed-identity-federated-credentials.png)
 
+### Grant the managed identity access to ACR and AKS
+
+The GitHub Actions workflow uses the same user-assigned managed identity to
+push the application image and deploy it to AKS. Assign **Contributor** on both
+resources before rerunning the workflow:
+
+1. In the Azure portal, open the Azure Container Registry selected during the
+   Automated Deployment setup.
+2. Select **Access control (IAM)** > **+ Add** > **Add role assignment**.
+3. Select the **Contributor** role, then select **Next**.
+4. For **Assign access to**, select **Managed identity**, then select **+ Select
+   members**.
+5. Select **User-assigned managed identity** and choose the identity used by
+   the GitHub federated credential. Select **Select**, then **Review + assign**.
+6. Open the existing AKS cluster selected during the Automated Deployment
+   setup.
+7. Select **Access control (IAM)** > **+ Add** > **Add role assignment**.
+8. Assign the **Contributor** role to the same user-assigned managed identity.
+9. Wait a few minutes for both role assignments to propagate before rerunning
+   the GitHub Actions workflow.
+
 ### Set the GitHub Actions secrets before rerunning
 
 The generated workflow reads the Azure identity values from GitHub Actions
