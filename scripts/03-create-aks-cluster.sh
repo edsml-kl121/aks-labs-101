@@ -10,6 +10,16 @@ set -euo pipefail
 
 STATE_FILE="$(dirname "$0")/../.lab-state.env"
 
+CONTAINER_SERVICE_STATE=$(az provider show \
+  --namespace Microsoft.ContainerService \
+  --query registrationState \
+  -o tsv)
+
+if [[ "${CONTAINER_SERVICE_STATE}" != "Registered" ]]; then
+  echo "==> Registering the Microsoft.ContainerService resource provider..."
+  az provider register --namespace Microsoft.ContainerService --wait
+fi
+
 echo "==> Looking up the latest default Kubernetes version in ${LOCATION}..."
 K8S_VERSION=$(az aks get-versions -l "${LOCATION}" \
   --query "reverse(sort_by(values[?isDefault==true].{version: version}, &version)) | [0]" \
