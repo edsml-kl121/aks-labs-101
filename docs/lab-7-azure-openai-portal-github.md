@@ -1,6 +1,6 @@
-# Lab 7: Connect AKS to Azure OpenAI in the Azure portal
+# Lab 7: Connect AKS to Azure OpenAI with GitHub
 
-This is the portal-only AKS Automatic and Azure OpenAI path. It forks the
+This is the GitHub and Azure portal path for AKS Automatic and Azure OpenAI. It forks the
 Contoso Air application, deploys it to the existing lab AKS cluster with Azure
 Automated Deployments, and connects the application to Azure OpenAI. You do not
 need Bash, Azure CLI, GitHub CLI, or `kubectl`.

@@ -140,12 +140,16 @@ Open `http://EXTERNAL-IP` after an IP appears.
 
 ### 9. Connect to Azure OpenAI
 
-Choose either option:
+Choose an implementation:
 
 - **Option A - Bash:** Run the automated script below.
-- **Option B - Azure portal:** Follow the illustrated
-  [Lab 7 portal click-through guide](docs/lab-7-azure-openai-portal.md). No Bash
-  or terminal commands are required.
+- **Option B - GitHub:** Follow the illustrated
+  [GitHub and Azure portal exercise](docs/lab-7-azure-openai-portal-github.md).
+- **Option C - Azure DevOps:** Follow the
+  [Azure DevOps and Azure portal exercise](docs/lab-7-azure-openai-portal-azure-devops.md).
+
+The GitHub and Azure DevOps exercises can both be completed in the browser. No
+local Bash, Azure CLI, GitHub CLI, or `kubectl` installation is required.
 
 ```bash
 ./scripts/07-connect-azure-openai.sh
