@@ -145,7 +145,9 @@ Choose an implementation:
 - **Option A - Bash:** Run the automated script below.
 - **Option B - GitHub:** Follow the illustrated
   [GitHub and Azure portal exercise](docs/lab-7-azure-openai-portal-github.md).
-- **Option C - Azure DevOps:** Follow the
+- **Option C - Azure DevOps:** If needed, first
+  [set up an Azure DevOps organization and project](docs/lab-7-setup-azuredevops-org.md),
+  then follow the
   [Azure DevOps and Azure portal exercise](docs/lab-7-azure-openai-portal-azure-devops.md).
 
 The GitHub and Azure DevOps exercises can both be completed in the browser. No

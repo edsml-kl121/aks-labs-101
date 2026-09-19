@@ -1,9 +1,9 @@
 # Lab 7: Connect AKS to Azure OpenAI with Azure DevOps
 
-This is the Azure DevOps and Azure portal path for AKS Automatic and Azure
-OpenAI. It imports the Contoso Air application into Azure Repos, deploys it to
-the existing lab AKS cluster with Azure Automated Deployments, and connects the
-application to Azure OpenAI. You do not need Bash, Azure CLI, or `kubectl`.
+This is the Azure DevOps and Azure portal path for AKS Automatic and Azure OpenAI. It imports
+the Contoso Air application into Azure Repos, deploys it to the existing lab AKS
+cluster with Azure Automated Deployments, and connects the application to Azure
+OpenAI. You do not need Bash, Azure CLI, or `kubectl`.
 
 The screenshots below come from the
 [AKS Automatic lab](https://azure-samples.github.io/aks-labs/docs/getting-started/aks-automatic/).
@@ -17,8 +17,10 @@ You should already have:
 - The Azure resource group and shared resources from the earlier lab steps.
 - The existing AKS cluster provisioned in the earlier lab steps.
 - A user-assigned managed identity whose name normally begins with `myidentity`.
-- An Azure DevOps organization and a project where you can create repositories,
-  pipelines, and service connections.
+- An Azure DevOps organization and a project where you can create repositories
+   and pipelines. If needed, complete
+   [Set up an Azure DevOps organization for Lab 7](lab-7-setup-azuredevops-org.md)
+   first.
 - **Contributor** and **User Access Administrator** roles on the lab resource
   group.
 
@@ -31,8 +33,9 @@ The **DevHub GitHub OAuth** role is not needed for this exercise.
 ## 1. Create an Azure OpenAI resource
 
 1. Open the [Azure portal](https://portal.azure.com/).
-2. Search for **Azure OpenAI**, select it, and then select **Create**.
-3. On **Basics**, enter:
+2. In the top search box, enter **Azure OpenAI**.
+3. Select **Azure OpenAI**, then select **Create**.
+4. On **Basics**, enter:
 
    | Setting | Value |
    | --- | --- |
@@ -42,47 +45,33 @@ The **DevHub GitHub OAuth** role is not needed for this exercise.
    | Name | A globally unique name, such as `myopenai-<your initials>` |
    | Pricing tier | `Standard S0` |
 
-4. Select **Next** through the remaining tabs. Leave public network access
+5. Select **Next** through the remaining tabs. Leave public network access
    enabled for this lab.
-5. Select **Review + submit** and then **Create**.
-6. When deployment finishes, select **Go to resource**.
+6. Select **Review + submit**, then **Create**.
+7. When deployment finishes, select **Go to resource**.
 
 ## 2. Deploy a chat model
 
 1. On the Azure OpenAI resource overview, select **Go to Azure AI Foundry
-   portal**. If it is not shown, open [Azure AI Foundry](https://ai.azure.com/)
-   and select the Azure OpenAI resource.
+   portal**. If that button is not shown, open
+   [Azure AI Foundry](https://ai.azure.com/) and select the Azure OpenAI
+   resource.
 2. Select **Model deployments** or **Deployments**.
 3. Select **Deploy model** > **Deploy base model**.
-4. Select `gpt-5.4-mini`. If unavailable, choose another chat-completion model
-   available to your subscription and region.
-5. Set the deployment name to the model name, keep the default deployment type,
-   choose the smallest available capacity, and select **Deploy**.
-6. Open the deployment in **Chat playground**, send a short message, and confirm
-   that the model replies.
+4. Select `gpt-5.4-mini`. If it is unavailable, choose another chat-completion
+   model available in your region and subscription.
+5. Set the deployment name to the model name, then select **Deploy**. Keep the
+   default deployment type and use the smallest available capacity for the lab.
+6. Open the deployment in the **Chat playground**, send a short message, and
+   confirm the model replies. This verifies the Azure OpenAI deployment itself.
 
-Keep the Azure OpenAI resource and deployment names available.
+Keep the Azure OpenAI resource name and model deployment name available for the
+next section.
 
 ## 3. Import Contoso Air into Azure Repos
 
 1. Open [Azure DevOps](https://dev.azure.com/) and select your organization and
    project.
-
-   If this is your first time using Azure DevOps, select **Continue** to finish
-   setting up your profile.
-
-   ![Get started with Azure DevOps](aks-automatic/azure-devops-assets/azure-devops-get-started.png)
-
-   If you do not have an organization, select **Create new organization**.
-
-   ![Create an Azure DevOps organization](aks-automatic/azure-devops-assets/azure-devops-create-organization.png)
-
-   Enter a unique organization name, choose the region where your projects
-   will be hosted, select the lab subscription, and select **Continue**. Create
-   a project for the lab when prompted.
-
-   ![Configure the Azure DevOps organization](aks-automatic/azure-devops-assets/azure-devops-configure-organization.png)
-
 2. In your project, select **Repos** > **Files**.
 3. From the repository selector, select **Import repository**. If the project
    has no repository, select **Import** on the welcome page.
@@ -166,8 +155,13 @@ Select **Next**.
    monitoring resources when offered.
 5. Select **Next**.
 6. Review the generated Dockerfile and Kubernetes deployment files.
+
+![Review the Automated Deployment](aks-automatic/assets/deploy-app-review.png)
+
 7. Select **Deploy**. Keep the browser page open while Azure prepares the Azure
    Pipeline and application deployment. This can take up to 20 minutes.
+
+![Deploy the application](aks-automatic/assets/deploy-app-deploy.png)
 
 ## 7. Review and merge the generated pull request
 
@@ -232,42 +226,43 @@ its build context are under `src/web` rather than the repository root.
 
 ## 8. Test Contoso Air before connecting it
 
-1. In the Azure portal, open the existing AKS cluster.
+1. In the Azure portal, open the existing lab AKS cluster.
 2. Select **Kubernetes resources** > **Services and ingresses**.
 3. Select the external IP for the `contoso-air` service.
 
 ![Contoso Air external IP](aks-automatic/assets/contoso-air-service-ip.png)
 
-4. Select **Ask the AI travel assistant** and send a message. The initial
-   request should report that the chat provider is not configured.
+4. In Contoso Air, select **Ask the AI travel assistant** and send a message.
+   The initial request should report that the chat provider is not configured.
 
 ![Chat provider is not configured](aks-automatic/assets/ask-ai-travel-assistant-response.png)
 
 ## 9. Configure Contoso Air for Azure OpenAI
 
-1. Return to the AKS cluster in the Azure portal.
+1. Return to the AKS Automatic cluster in the Azure portal.
 2. Select **Kubernetes resources** > **Configuration**.
 3. Filter by the `dev` namespace and open `contoso-air-config`.
-4. Select **YAML** and replace the `data` section with:
+4. Select **YAML** and add these entries under `data`:
 
 ```yaml
-data:
-  AZURE_OPENAI_API_VERSION: 2024-12-01-preview
-  AZURE_OPENAI_DEPLOYMENT: gpt-5.4-mini
-  CHAT_PROVIDER: azure
-  LOG_CHAT: "true"
+AZURE_OPENAI_API_VERSION: 2024-12-01-preview
+AZURE_OPENAI_DEPLOYMENT: gpt-5.4-mini
+CHAT_PROVIDER: azure
+LOG_CHAT: 'true'
 ```
 
 Use your actual model deployment name if you did not deploy `gpt-5.4-mini`.
 
-5. Select **Review + save**, confirm the manifest changes, and select **Save**.
-
 ![Edit the Contoso Air ConfigMap](aks-automatic/assets/contoso-air-config-edit.png)
+
+5. Select **Review + save**, confirm the manifest changes, and select **Save**.
 
 ## 10. Open Service Connector
 
-1. Open the AKS cluster and select **Settings** > **Service Connector**.
-2. Select **+ Create**.
+1. Return to the [Azure portal](https://portal.azure.com/).
+2. Open the existing lab AKS cluster selected in step 6.
+3. In the cluster menu, select **Settings** > **Service Connector**.
+4. Select **+ Create**.
 
 ![AKS Service Connector page](aks-automatic/assets/service-connector.png)
 
@@ -284,26 +279,46 @@ On the **Basics** tab, enter:
 
 Select **Next: Authentication**.
 
+![Service Connector basics](aks-automatic/assets/service-connector-basics.png)
+
 ## 12. Configure workload identity
 
-1. Select **Workload Identity** and choose the user-assigned managed identity
-   created by the shared-resources deployment. Its name normally begins with
-   `myidentity`.
-2. Expand **Advanced** and confirm that **Cognitive Services OpenAI
-   Contributor** is the assigned role. Do not use secret-based authentication.
+1. Select **Workload Identity**.
+2. Select the user-assigned managed identity created by the shared-resources
+   deployment. Its name normally begins with `myidentity`.
+3. Expand **Advanced** and confirm that **Cognitive Services OpenAI
+   Contributor** is the assigned role.
+4. Do not select secret-based authentication. No Azure OpenAI API key is needed.
+5. Select **Next: Networking**.
 
 ![Select workload identity](aks-automatic/assets/service-connector-auth.png)
 
-3. Select **Next: Networking**.
+The advanced view shows the Azure role and the connection settings that Service
+Connector will add to Kubernetes.
+
+![Service Connector advanced settings](aks-automatic/assets/service-connector-advanced.png)
 
 ## 13. Create the connection
 
-1. Keep the default public-network option, and select **Next: Review + create**.
-2. Confirm the `dev` namespace, workload identity authentication, and selected
-   Azure OpenAI account, then select **Create**.
-3. When provisioning finishes, open the connection and confirm its status is
-   **Succeeded**. If **Validate** is available, select it and confirm validation
-   succeeds.
+1. On **Networking**, keep the default public-network option for this lab, then
+   select **Next: Review + create**.
+2. Confirm that the namespace is `dev`, authentication is **Workload
+   Identity**, and the correct Azure OpenAI account is selected.
+3. Select **Create**. Provisioning can take several minutes.
+
+![Review the Service Connector connection](aks-automatic/assets/service-connector-review.png)
+
+When creation finishes, return to **Settings** > **Service Connector** and open
+the connection. Confirm that its provisioning or connection status is
+**Succeeded**. If the page offers **Validate**, select it and confirm validation
+succeeds.
+
+Service Connector has now:
+
+- Granted the managed identity access to Azure OpenAI.
+- Created a federated identity credential for the `dev` namespace.
+- Created a Kubernetes service account linked to the managed identity.
+- Added the non-secret Azure OpenAI connection settings to Kubernetes.
 
 ## 14. Attach the connection to Contoso Air
 
@@ -319,7 +334,7 @@ Select **Next: Authentication**.
 
 4. Review the highlighted service account, workload identity label, and
    connection-setting changes.
-5. Select **Apply** and wait one or two minutes for the deployment rollout.
+5. Select **Apply**. Wait one or two minutes for the deployment rollout.
 
 ![Apply the workload identity configuration](aks-automatic/assets/service-connector-yaml-highlights.png)
 
@@ -328,13 +343,14 @@ Select **Next: Authentication**.
 1. Return to the Contoso Air browser tab and refresh it.
 2. Select **Ask the AI travel assistant**.
 3. Ask the assistant to find a flight.
-4. Confirm that it returns an AI-generated response without a provider or
+4. Confirm it returns an AI-generated response without a provider or
    authentication error.
 
 ![Successful Contoso Air Azure OpenAI chat](aks-automatic/assets/contoso-air-chat.png)
 
 ## Connection complete
 
-The successful response confirms the full path: Azure Pipelines deployed the
-application to AKS Automatic, Service Connector configured workload identity,
-and Contoso Air authenticated to Azure OpenAI without an API key.
+The successful Contoso Air response confirms the full path: Azure Pipelines
+deployed the application to AKS Automatic, Service Connector configured workload
+identity, and the application authenticated to the Azure OpenAI model without an
+API key.
